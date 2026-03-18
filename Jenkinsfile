@@ -14,7 +14,7 @@ pipeline {
                 sh 'ls -la'
             }
         }
-        
+
         stage('SAST - Bandit') {
             steps {
                 echo "Análisis estático de seguridad con Bandit"
@@ -29,59 +29,18 @@ pipeline {
             }
         }
 
-        // stage('SAST - Bandit') {
-        //     steps {
-        //         echo "Análisis estático de seguridad con Bandit"
-        //         sh '''
-        //             docker run --rm \
-        //                 -v ${WORKSPACE}:/src \
-        //                 cytopia/bandit \
-        //                 -r /src/app \
-        //                 -f txt \
-        //                 -o /src/bandit-report.txt \
-        //                 || true
-        //             cat bandit-report.txt
-        //         '''
-        //     }
-        //     post {
-        //         always {
-        //             archiveArtifacts artifacts: 'bandit-report.txt', allowEmptyArchive: true
-        //         }
-        //     }
-        // }
-
         stage('SCA - pip-audit') {
             steps {
                 echo "Análisis de dependencias con pip-audit"
                 sh '''
                     docker run --rm \
                         -v ${WORKSPACE}:/src \
-                        pypa/pip-audit \
+                        ghcr.io/pypa/pip-audit \
                         -r /src/requirements.txt \
                         || true
                 '''
             }
         }
-        // stage('SCA - pip-audit') {
-        //     steps {
-        //         echo "Análisis de dependencias con pip-audit"
-        //         sh '''
-        //             docker run --rm \
-        //                 -v ${WORKSPACE}:/src \
-        //                 pypa/pip-audit \
-        //                 -r /src/requirements.txt \
-        //                 -f json \
-        //                 -o /src/pip-audit-report.json \
-        //                 || true
-        //             cat pip-audit-report.json
-        //         '''
-        //     }
-        //     post {
-        //         always {
-        //             archiveArtifacts artifacts: 'pip-audit-report.json', allowEmptyArchive: true
-        //         }
-        //     }
-        // }
 
         stage('Build imagen Docker') {
             steps {
@@ -96,20 +55,11 @@ pipeline {
                 sh '''
                     docker run --rm \
                         -v /var/run/docker.sock:/var/run/docker.sock \
-                        -v ${WORKSPACE}:/output \
                         aquasec/trivy image \
-                        --format table \
-                        --output /output/trivy-report.txt \
                         --severity HIGH,CRITICAL \
                         ${IMAGE_NAME}:${IMAGE_TAG} \
                         || true
-                    cat trivy-report.txt
                 '''
-            }
-            post {
-                always {
-                    archiveArtifacts artifacts: 'trivy-report.txt', allowEmptyArchive: true
-                }
             }
         }
 
@@ -117,7 +67,7 @@ pipeline {
 
     post {
         success {
-            echo "Pipeline completado. Revisa los artefactos para los informes de seguridad."
+            echo "Pipeline completado. Revisa el Console Output para los informes de seguridad."
         }
         failure {
             echo "Pipeline fallido. Revisa el Console Output."
