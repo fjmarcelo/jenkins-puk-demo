@@ -44,4 +44,33 @@ pipeline {
 
         stage('Build imagen Docker') {
             steps {
-                echo "Construyendo imagen ${IMAGE_NA
+                echo "Construyendo imagen ${IMAGE_NAME}:${IMAGE_TAG}"
+                sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+            }
+        }
+
+        stage('Escaneo imagen - Trivy') {
+            steps {
+                echo "Escaneando imagen con Trivy"
+                sh '''
+                    docker run --rm \
+                        -v /var/run/docker.sock:/var/run/docker.sock \
+                        aquasec/trivy image \
+                        --severity HIGH,CRITICAL \
+                        ${IMAGE_NAME}:${IMAGE_TAG} \
+                        || true
+                '''
+            }
+        }
+
+    }
+
+    post {
+        success {
+            echo "Pipeline completado. Revisa el Console Output para los informes de seguridad."
+        }
+        failure {
+            echo "Pipeline fallido. Revisa el Console Output."
+        }
+    }
+}
