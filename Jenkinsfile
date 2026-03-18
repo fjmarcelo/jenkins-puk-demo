@@ -1,20 +1,21 @@
 pipeline {
-    agent any
+        agent any
 
-    environment {
-        IMAGE_NAME = "secureapi"
-        IMAGE_TAG  = "build-${BUILD_NUMBER}"
-    }
-
-    stages {
-
-        stage('Checkout') {
-            steps {
-                echo "Código obtenido de GitHub"
-                sh 'ls -la'
+            environment {
+                IMAGE_NAME = "secureapi"
+                IMAGE_TAG  = "build-${BUILD_NUMBER}"
             }
-        }
 
+            stages {
+
+                stage('Checkout') {
+                    steps {
+                        cleanWs()
+                        checkout scm
+                        echo "Código obtenido de GitHub"
+                        sh 'ls -la && ls -la app/'
+                    }
+                }
         // stage('SAST - Bandit') {
         //     steps {
         //         echo "Análisis estático de seguridad con Bandit"
