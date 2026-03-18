@@ -15,9 +15,30 @@ pipeline {
             }
         }
 
+        // stage('SAST - Bandit') {
+        //     steps {
+        //         echo "Análisis estático de seguridad con Bandit"
+        //         sh '''
+        //             docker run --rm \
+        //                 -v ${WORKSPACE}:/src \
+        //                 cytopia/bandit \
+        //                 -r /src/app \
+        //                 -f txt \
+        //                 || true
+        //         '''
+        //     }
+        // }
+
         stage('SAST - Bandit') {
             steps {
                 echo "Análisis estático de seguridad con Bandit"
+                sh '''
+                    docker run --rm \
+                        -v ${WORKSPACE}:/src \
+                        cytopia/bandit \
+                        ls -la /src/app \
+                        || true
+                '''
                 sh '''
                     docker run --rm \
                         -v ${WORKSPACE}:/src \
