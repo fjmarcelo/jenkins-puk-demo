@@ -14,7 +14,7 @@ pipeline {
                 sh 'ls -la'
             }
         }
-
+        
         stage('SAST - Bandit') {
             steps {
                 echo "Análisis estático de seguridad con Bandit"
@@ -24,17 +24,31 @@ pipeline {
                         cytopia/bandit \
                         -r /src/app \
                         -f txt \
-                        -o /src/bandit-report.txt \
                         || true
-                    cat bandit-report.txt
                 '''
             }
-            post {
-                always {
-                    archiveArtifacts artifacts: 'bandit-report.txt', allowEmptyArchive: true
-                }
-            }
         }
+
+        // stage('SAST - Bandit') {
+        //     steps {
+        //         echo "Análisis estático de seguridad con Bandit"
+        //         sh '''
+        //             docker run --rm \
+        //                 -v ${WORKSPACE}:/src \
+        //                 cytopia/bandit \
+        //                 -r /src/app \
+        //                 -f txt \
+        //                 -o /src/bandit-report.txt \
+        //                 || true
+        //             cat bandit-report.txt
+        //         '''
+        //     }
+        //     post {
+        //         always {
+        //             archiveArtifacts artifacts: 'bandit-report.txt', allowEmptyArchive: true
+        //         }
+        //     }
+        // }
 
         stage('SCA - pip-audit') {
             steps {
@@ -44,18 +58,30 @@ pipeline {
                         -v ${WORKSPACE}:/src \
                         pypa/pip-audit \
                         -r /src/requirements.txt \
-                        -f json \
-                        -o /src/pip-audit-report.json \
                         || true
-                    cat pip-audit-report.json
                 '''
             }
-            post {
-                always {
-                    archiveArtifacts artifacts: 'pip-audit-report.json', allowEmptyArchive: true
-                }
-            }
         }
+        // stage('SCA - pip-audit') {
+        //     steps {
+        //         echo "Análisis de dependencias con pip-audit"
+        //         sh '''
+        //             docker run --rm \
+        //                 -v ${WORKSPACE}:/src \
+        //                 pypa/pip-audit \
+        //                 -r /src/requirements.txt \
+        //                 -f json \
+        //                 -o /src/pip-audit-report.json \
+        //                 || true
+        //             cat pip-audit-report.json
+        //         '''
+        //     }
+        //     post {
+        //         always {
+        //             archiveArtifacts artifacts: 'pip-audit-report.json', allowEmptyArchive: true
+        //         }
+        //     }
+        // }
 
         stage('Build imagen Docker') {
             steps {
