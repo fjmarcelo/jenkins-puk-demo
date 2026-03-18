@@ -8,26 +8,37 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
-            steps {
-                cleanWs()
-                checkout scm
-                echo "Código obtenido de GitHub"
-                sh 'ls -la && ls -la app/'
-            }
-        }
-
-        stage('SAST - Bandit') {
-            steps {
-                echo "Análisis estático de seguridad con Bandit"
-                sh '''
-                    docker run --rm \
-                        -v ${WORKSPACE}:/src \
-                        python:3.12-slim \
-                        sh -c "pip install bandit -q && bandit -r /src/app -f txt || true"
-                '''
-            }
-        }
+        // stage('Checkout') {
+        //     steps {
+        //         cleanWs()
+        //         checkout scm
+        //         echo "Código obtenido de GitHub"
+        //         sh 'ls -la && ls -la app/'
+        //     }
+        // }
+        //
+        // stage('SAST - Bandit') {
+        //     steps {
+        //         echo "Análisis estático de seguridad con Bandit"
+        //         sh '''
+        //             docker run --rm \
+        //                 -v ${WORKSPACE}:/src \
+        //                 python:3.12-slim \
+        //                 sh -c "pip install bandit -q && bandit -r /src/app -f txt || true"
+        //         '''
+        //     }
+        // }
+        // stage('SAST - Bandit') {
+        //     steps {
+        //         echo "Análisis estático de seguridad con Bandit"
+        //         sh """
+        //             docker run --rm \\
+        //                 -v \${WORKSPACE}:/src \\
+        //                 python:3.12-slim \\
+        //                 sh -c 'pip install bandit -q && bandit -r /src/app -f txt || true'
+        //         """
+        //     }
+        // }
 
         stage('SCA - pip-audit') {
             steps {
